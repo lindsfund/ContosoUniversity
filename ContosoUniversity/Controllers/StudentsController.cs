@@ -58,13 +58,22 @@ namespace ContosoUniversity.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,LastName,FirstMidName,EnrollmentDate")] Student student)
+        public async Task<IActionResult> Create(
+            [Bind("LastName,FirstMidName,EnrollmentDate")] Student student)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(student);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(student);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch(DbUpdateException /* ex */)
+            {
+                //Log the error(uncomment ex var name and write a log)
+                ModelState.AddModelError("" + "Unable to save changes. " + "See your system admin.");
             }
             return View(student);
         }
